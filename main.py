@@ -14,10 +14,16 @@ def main() -> None:
         raise SystemExit("line must not be only whitespace")
     if "\r" in LINE or "\n" in LINE:
         raise SystemExit("line must be a single line with no line breaks")
+    if LINE != LINE.strip():
+        raise SystemExit("line must not start or end with whitespace")
     os.makedirs("/output", exist_ok=True)
     with open("/output/entry.txt", "w", encoding="utf-8", newline="") as f:
         f.write(LINE)
     os.chmod("/output/entry.txt", 0o644)
+    import stat as _stat
+    mode = _stat.S_IMODE(os.stat("/output/entry.txt").st_mode)
+    if mode != 0o644:
+        raise SystemExit(f"entry.txt mode is {oct(mode)}, must be 0o644")
     with open("/output/entry.txt", "r", encoding="utf-8", newline="") as f:
         back = f.read()
     if back != LINE:
